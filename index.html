@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | Why Timing Is Everything in Semantic Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            background-color: #ffffff;
+            color: #1a1a1a;
+        }
+        .serif-heading {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            letter-spacing: -0.02em;
+        }
+        .gradient-button {
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        .gradient-button:hover {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            transform: translateY(-1px);
+        }
+        .nav-container {
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 999px;
+        }
+        .prose h1, .prose h2, .prose h3 {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            letter-spacing: -0.02em;
+        }
+        .prose p {
+            color: #4a4a4a;
+            line-height: 1.8;
+        }
+        .prose a {
+            color: #1a1a1a;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .prose blockquote {
+            border-left: 2px solid #e2e8f0;
+            padding-left: 1.5rem;
+            color: #6b6b6b;
+            font-style: italic;
+        }
+        .prose code {
+            background: #f5f5f5;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+        }
+        .prose pre {
+            background: #f8f8f8;
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        .prose pre code {
+            background: none;
+            padding: 0;
+        }
+        .prose img {
+            max-width: 100%;
+            height: auto;
+        }
+        .prose ol {
+            list-style: decimal;
+            padding-left: 1.5rem;
+        }
+        .prose ol li {
+            margin-bottom: 0.75rem;
+            color: #4a4a4a;
+        }
+        @media (max-width: 640px) {
+            .serif-heading {
+                font-size: 1.875rem;
+            }
+            h2 {
+                font-size: 1.5rem !important;
+            }
+            h3 {
+                font-size: 1.25rem !important;
+            }
+            .prose p {
+                font-size: 0.95rem;
+                line-height: 1.7;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+    <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-16 sm:pb-20">
+
+        <article>
+            <header class="mb-16 text-center">
+                <div class="mb-6 px-4 py-1 border border-gray-100 bg-gray-50 rounded-full text-[10px] tracking-[0.2em] text-gray-400 uppercase font-semibold inline-block">
+                    Article
+                </div>
+                <h1 class="serif-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-gray-800 leading-tight mb-6">
+                    Why Timing Is Everything in Semantic Search
+                </h1>
+                <div class="flex items-center justify-center gap-4 text-sm text-gray-400">
+                    <time datetime="2026-07-12">July 13, 2026</time>
+                    <span>·</span>
+                    <span>12 min read</span>
+                </div>
+            </header>
+
+            <div class="prose prose-lg mx-auto">
+
+                <h2 class="text-2xl sm:text-3xl text-gray-800 mt-10 sm:mt-12 mb-4 sm:mb-6">1. Introduction</h2>
+                <p class="mb-6">
+                    Search systems live and die by one design choice that rarely gets enough attention: how a query and a document are actually compared to each other under the hood. Get this choice right, and results feel sharp and relevant. Get it wrong, and even a well-tuned system starts returning near misses. This choice comes down to a single question.
+                </p>
+                <p class="mb-6">
+                    When building a search system, one fundamental question emerges. When should a query and document interact?
+                </p>
+                <p class="mb-6">
+                    The answer to this question affects both the quality of your search results and your system's scalability.
+                </p>
+                <p class="mb-6">
+                    In this post, we'll introduce the late interaction paradigm, the foundation of multivector search, and explore how it compares to other approaches. By the end, you'll understand why late interaction offers a compelling middle ground between fast but imprecise methods and accurate but slow ones.
+                </p>
+                <p class="mb-6">
+                    There are various models available and one fundamental question is which one should I use in my search system?
+                </p>
+
+                <h2 class="text-2xl sm:text-3xl text-gray-800 mt-10 sm:mt-12 mb-4 sm:mb-6">2. What Do We Mean By Interaction?</h2>
+                <p class="mb-6">
+                    Before we get into late interaction itself, it's worth being precise about what "interaction" actually means here. Every search system has to decide, at some point, whether the query and the document are allowed to influence each other's representation, and if so, when. Some systems keep the two completely separate until the very last step. Others mix them together from the very first layer of the encoder. That single decision, more than anything else, determines how the system scales and how precise it can be.
+                </p>
+                <p class="mb-6">
+                    On one end, we have no interaction. The query and document are encoded completely independently into fixed representations, then compared. They never see each other during encoding. This approach is fast but it loses nuance because everything gets compressed into a single point.
+                </p>
+                <p class="mb-6">
+                    On the other end, we have early interaction. This is where cross encoders live. The query and document are encoded together with each word attending to the other during the encoding process. You get maximum interaction but no precomputation is possible, so it doesn't scale.
+                </p>
+                <p class="mb-6">
+                    And in the middle we have late interaction. The query and document are encoded independently just like the no interaction approach but we preserve fine grain token level representations that interact during scoring. The interaction happens late only when we compute relevancy scores. It gives you the best of both worlds.
+                </p>
+
+                <ol class="mb-6 space-y-2">
+                    <li><strong>No Interaction:</strong> Encode separately, compare single vectors. Fast but loses nuance.</li>
+                    <li><strong>Early Interaction:</strong> Cross-encoders process together. Precise but can't scale.</li>
+                    <li><strong>Late Interaction:</strong> Encode separately, compare at token level. Best of both worlds.</li>
+                </ol>
+
+                <figure>
+                  <img src="images/interaction-comparison (2).png" alt="interaction-comparison">
+                  <figcaption></figcaption>
+                </figure><br>
+
+                <p class="mb-6">
+                    This diagram shows the three paradigms side by side. Notice how late interaction preserves the independent encoding but adds the token level comparison step at the end. The key insight is that we get the precomputation benefits of no interaction with the precision benefits of comparing at the token level. Let's look at each paradigm on its own before we get to how late interaction actually pulls this off.
+                </p>
+
+                <h3 class="text-xl sm:text-2xl text-gray-800 mt-8 sm:mt-10 mb-3 sm:mb-4">2.1 No Interaction</h3>
+                <p class="mb-6">
+                    This is the strategy most search systems use today: squeeze the whole document down into one dense vector, do the same for the query, and then measure how close the two vectors sit to each other, usually with cosine similarity.
+                </p>
+                <p class="mb-6">
+                    Its biggest selling point is efficiency. Because the document side never depends on the query, every document vector can be computed ahead of time and simply looked up later. That's what lets this approach hold up even when a collection grows into the billions.
+                </p>
+                <p class="mb-6">
+                    The cost of that efficiency is detail. Squashing an entire document into one vector is a bit like reducing a whole novel down to a single tagline, you get the gist, but anything specific enough to matter for a particular question tends to get flattened out along the way.
+                </p>
+                <p class="mb-6">
+                    Under the hood, the model doesn't skip token level detail entirely, it computes it and then throws it away. Every token gets its own embedding first, and only afterward are those embeddings collapsed, usually by averaging them or by reading off a special summary token, into the one vector that actually gets stored. Whatever nuance lived in those individual token embeddings doesn't survive the collapse.
+                </p>
+
+                <h3 class="text-xl sm:text-2xl text-gray-800 mt-8 sm:mt-10 mb-3 sm:mb-4">2.2 Early Interaction</h3>
+                <p class="mb-6">
+                    Cross-encoders take the opposite bet. Rather than encoding the query and document apart and comparing them afterward, they feed both into the same network at once and let the model output a relevance score directly. Because the mixing happens right there in the encoder, this is what counts as early interaction.
+                </p>
+                <p class="mb-6">
+                    What you get in return is genuinely deep understanding. Since every word in the query can look directly at every word in the document while the model is still forming its representation, the relevance judgments it produces tend to be very precise.
+                </p>
+                <p class="mb-6">
+                    The catch is that none of this can be prepared in advance. Every single query-document pair has to be run through the network from scratch. Search a million documents, and a single query means a million full passes through the model, which is simply too slow to use as a first pass over a large collection.
+                </p>
+                <p class="mb-6">
+                    That's why cross-encoders tend to show up later in a pipeline, re-scoring a short list of candidates rather than searching the whole collection. Nothing about a document can be computed once and reused, so every new query starts the work over from zero.
+                </p>
+
+                <h2 class="text-2xl sm:text-3xl text-gray-800 mt-10 sm:mt-12 mb-4 sm:mb-6">3. Caught Between Two Extremes</h2>
+                <p class="mb-6">
+                    Put the two approaches side by side and the problem becomes obvious. One end of the spectrum is fast and scalable but shallow. The other end is precise but grinds to a halt on anything larger than a small candidate list. Neither one is really usable on its own for large scale, high precision search. What's actually needed is a way to keep the pre-computation advantage of the first approach while still getting something close to the token level precision of the second. Closing that gap is the whole point of late interaction.
+                </p>
+
+                <h2 class="text-2xl sm:text-3xl text-gray-800 mt-10 sm:mt-12 mb-4 sm:mb-6">4. Late Interaction</h2>
+                <p class="mb-6">
+                    The trick late interaction uses is almost stubbornly simple. Encode the query and the document independently, same as before, but instead of collapsing each one down to a single vector, hang on to a separate vector for every token, and don't compare anything until search time actually arrives. A document stops being one point in space and becomes a whole cloud of them, one per token, each still carrying its own contextual meaning.
+                </p>
+                <p class="mb-6">
+                    Here is the key insight. Instead of one vector per document, we create one vector per token. If your document has 200 tokens, you get 200 vectors.
+                </p>
+                <p class="mb-6">
+                    We store all those token vectors. No pooling, no compression. The fine grain information stays intact. Unlike single vector search where we aggregate everything into one vector, we keep all the token vectors.
+                </p>
+                <p class="mb-6">
+                    At query time, we do the same thing, encode the query into token vectors. Then we compare query tokens against document tokens. Each query token finds its best match among the document tokens.
+                </p>
+                <p class="mb-6">
+                    The interaction is late because it only happens during scoring. Documents are encoded once, stored, and reused for every query. This is the key to scalability.
+                </p>
+
+                <p class="mb-6">
+                    Strip away the detail and the whole mechanism comes down to one habit: never reduce a token to something less than itself, and never let two things interact before you actually need an answer.
+                </p>
+
+                <p class="mb-6">
+                    Looked at this way, late interaction isn't really a third, unrelated idea, it's a hybrid that keeps one property from each of the earlier approaches. Like a cross-encoder, it holds onto fine, token-level detail instead of averaging it away. Like single-vector search, it never lets the query touch the document during encoding, which is exactly what makes pre-computation possible in the first place.
+                </p>
+
+                <figure>
+                  <img src="images/late-interaction-working.png" alt="late-interaction-working">
+                  <figcaption></figcaption>
+                </figure><br>
+
+                <p class="mb-6">
+                    Here's the late interaction workflow in detail. At indexing time, pass the document through an encoder to generate one embedding vector per token. Then store them all. At query time, encode the query the same way.
+                </p>
+                <p class="mb-6">
+                    One vector per query token, compare token by token and aggregate into the final score.
+                </p>
+
+                <h2 class="text-2xl sm:text-3xl text-gray-800 mt-10 sm:mt-12 mb-4 sm:mb-6">5. Enter ColBERT</h2>
+                <p class="mb-6">
+                    The model most associated with this idea is ColBERT, which stands for Contextualized Late Interaction over BERT and came out of Stanford. It's the paper that really put late interaction on the map, by showing it could match the accuracy people expected from cross-encoders while still running at roughly the speed of single-vector search.
+                </p>
+                <p class="mb-6">
+                    Its central move is refusing to throw anything away too early. Rather than pooling a document into one vector, ColBERT holds onto the full set of contextualized token vectors and waits, comparing them against the query's token vectors only once an actual search is being run.
+                </p>
+                <p class="mb-6">
+                    That single choice, to keep the set of vectors instead of pooling it away, is really what the rest of this post has been building toward.
+                </p>
+
+                <h2 class="text-2xl sm:text-3xl text-gray-800 mt-10 sm:mt-12 mb-4 sm:mb-6">6. What This Buys You</h2>
+                <p class="mb-6">
+                    Late interaction isn't just a technical optimization, it's a genuine shift in how we think about semantic search.
+                </p>
+                <p class="mb-6">
+                    Precomputation is the big win. Document embeddings can be computed once, stored, and reused for millions of queries. You don't need to re-encode documents for every query.
+                </p>
+                <p class="mb-6">
+                    Fine grain matching means a query about Apple computer can actually distinguish the company from the fruit. Different query tokens can match different parts of the documents. This is something single vector search simply cannot do.
+                </p>
+                <p class="mb-6">
+                    Contextual understanding comes from the model. The word bank has different embeddings in river bank versus financial bank.
+                </p>
+                <p class="mb-6">
+                    The context shapes each token's representation. This contextual precision is what makes late interaction so powerful.
+                </p>
+
+                <p class="mb-6">
+                    Put together, that's three things stacked on top of each other: the heavy lifting on the document side happens once and gets reused forever, individual terms can still be told apart from each other inside a query, and the surrounding words shape what each token actually means. None of that is available to a system that only ever produces one vector per document.
+                </p>
+
+                <figure>
+                  <img src="images/body-vs-prison-cell.png" alt="body-vs-prison-cell">
+                  <figcaption></figcaption>
+                </figure><br>
+
+                <p class="mb-6">
+                    This example shows why context matters. Same word, completely different embeddings, because the surrounding text changes the meaning. The token embeddings are contextualized by surrounding text enabling precise semantic matching.
+                </p>
+                <p class="mb-6">
+                    There's a knock-on benefit here too. Since a document is represented by many vectors instead of one, it doesn't have to boil down to a single "topic" anymore. A document that genuinely covers more than one idea can still surface for a query about just one of those ideas, because that query only needs to line up with the handful of tokens that are actually relevant to it, not with an average of everything the document talks about.
+                </p>
+                <p class="mb-6">
+                    And on the scaling side, the cost of searching grows along with the size of the collection, not with every possible query-document pairing the way a cross-encoder's does. That's the difference between a technique that works in a notebook and one that works in production.
+                </p>
+
+                <h2 class="text-2xl sm:text-3xl text-gray-800 mt-10 sm:mt-12 mb-4 sm:mb-6">7. Conclusion</h2>
+                <p class="mb-6">
+                    Understanding the conceptual foundation of late interaction is the first step. At its core, the idea is simple: don't force a query and a document to collapse into a single point before comparing them, and don't force them to interact so early that nothing can be precomputed. Encode independently, keep every token vector, and let the interaction happen late, only during scoring.
+                </p>
+                <p class="mb-6">
+                    That's what makes late interaction the best of both worlds. It keeps the precomputation benefits of no interaction, so document embeddings can be computed once, stored, and reused for millions of queries. And it keeps the precision benefits of comparing at the token level, so fine grain matching and contextual understanding are never averaged away.
+                </p>
+                <p class="mb-6">
+                    But there is an important question we haven't answered yet. How exactly do we compare sets of query vectors against sets of document vectors?
+                </p>
+                <p class="mb-6">
+                    In the next article, you'll learn about MaxSim, the distance metric that powers late interaction search. MaxSim defines the specific mathematical operation for computing similarity between multivector representations and understanding it is key to understanding both the power and challenges of this approach.
+                </p>
+
+            </div>
+
+        </article>
+
+    </main>
+
+    <footer class="py-12 text-center text-sm text-gray-400">
+        <p>Written with love by Achal.</p>
+    </footer>
+
+</body>
+</html>
